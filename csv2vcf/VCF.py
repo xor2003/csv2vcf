@@ -109,7 +109,7 @@ def VCF_website(file,website_url):
     :return: None
     '''
     file.write('item3.URL;type=pref:' + website_url + "\n")
-    file.write("END:VCARD")
+    file.write("END:VCARD\n")
     file.close()
 
 def VCF_Folder(filename):
@@ -120,7 +120,7 @@ def VCF_Folder(filename):
     :return: VCF_folder_adr as str
     '''
     folder_adr=os.path.dirname(filename)
-    filename_split=os.path.basename(filename).split(".")[0]
+    filename_split=filename.split("/")[-1].split(".")[0]
     VCF_folder_adr = os.path.join(folder_adr, "VCF_CONVERT_" + filename_split)
     if "VCF_CONVERT_"+filename_split not in os.listdir(folder_adr):
         os.mkdir(VCF_folder_adr)
@@ -143,7 +143,7 @@ def VCF_creator(folder_name,first_name,last_name,tel_mobile,tel_home,tel_work,em
     :param website_url: URL
     :return: None
     '''
-    file=open(os.path.join(folder_name,last_name+"_"+first_name+".vcf"),"w")
+    file=open(os.path.join(folder_name,last_name+"_"+first_name+".vcf"),"w", encoding="utf-8")
     VCF_init(file)
     VCF_name(file,first_name,last_name)
     VCF_phone(file,tel_mobile,tel_home,tel_work)
@@ -189,7 +189,7 @@ def VCF_write(temp,name_dict,foldername):
         else:
             VCF_creator(foldername, temp[0], temp[1], temp[2], temp[3], temp[4], temp[5], temp[6], temp[7], temp[8],
                         temp[9], temp[10])
-def csv_reader(file_name,GUI=False):
+def csv_reader(file_name):
     '''
     This function read input csv file and parse it
     :param file_name: file name or address of file
@@ -197,16 +197,17 @@ def csv_reader(file_name,GUI=False):
     :return: vcf_counter as integer
     '''
     try:
-        file_name=os.path.join(os.getcwd(),file_name)
-        file=open(file_name,"r")
+        file=open(file_name,"r", encoding="utf-8")
+
         vcf_counter=0
+
         foldername=VCF_Folder(file_name)
         for index,line in enumerate(file):
             if index>0:
                 stripped_line=line.strip()
                 temp=stripped_line.split(",")
                 if len(temp)>11:
-                    print("[Warning] CSV File Line "+str(index)+" Bad Format")
+                    print("[Warning] CSV File Line "+str(index)+" Bad Format "+str(len(temp)))
                     continue
                 else:
                     VCF_write(temp,name_dict,foldername)
@@ -215,9 +216,7 @@ def csv_reader(file_name,GUI=False):
 
     except FileNotFoundError:
         print("[Warning] Please Open CSV File")
-    except Exception as e:
-        if GUI==True:
-            messagebox.showinfo("CSV2VCF", "Error In Reading Input File")
-        print(str(e))
-        print("[Error] In Reading Input File")
+    except Exception as err:
+        print("[Error] In Reading Input File "+err.__str__())
+        messagebox.showinfo("CSV2VCF", "Error In Reading Input File")
 
